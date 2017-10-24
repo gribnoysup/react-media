@@ -1,6 +1,5 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import ReactDOMServer from 'react-dom/server'
 import Media from '../Media'
 
 const createMockMediaMatcher = (matchesOrMapOfMatches) => (qs) => ({
@@ -26,51 +25,6 @@ describe('A <Media> in browser environment', () => {
     node = document.createElement('div')
   })
 
-  describe('with a children function', () => {
-    beforeEach(() => {
-      window.matchMedia = createMockMediaMatcher(true)
-    })
-
-    it('should render expected result of the children function call', () => {
-      beforeEach(() => {
-        window.matchMedia = createMockMediaMatcher(true)
-      })
-
-      const element = (
-        <Media queries={{ sm: { maxWidth: 1000 }}}>
-          {({ sm }) => sm && <div>hello</div>}
-        </Media>
-      )
-
-      ReactDOM.render(element, node, () => {
-        expect(node.firstChild.innerHTML || '').toMatch(/hello/)
-      })
-    })
-  })
-
-  describe('with a render prop', () => {
-    beforeEach(() => {
-      window.matchMedia = createMockMediaMatcher(true)
-    })
-
-    it('should render expected result of the render prop call', () => {
-      beforeEach(() => {
-        window.matchMedia = createMockMediaMatcher(true)
-      })
-
-      const element = (
-        <Media
-          queries={{ sm: { maxWidth: 1000 }}}
-          render={({ sm }) => sm && <div>goodbye</div>}
-        />
-      )
-
-      ReactDOM.render(element, node, () => {
-        expect(node.firstChild.innerHTML || '').toMatch(/goodbye/)
-      })
-    })
-  })
-
   describe('with a query that matches', () => {
     beforeEach(() => {
       window.matchMedia = createMockMediaMatcher(true)
@@ -81,30 +35,43 @@ describe('A <Media> in browser environment', () => {
       lg: '(max-width: 2000px)',
     }
 
-    const expected = {
-      sm: true,
-      lg: true,
-    }
+    describe('and a child component', () => {
+      it('should render child and provide matches as a prop', () => {
+        const Component = (props) => props.matches.sm && props.matches.lg && <span>fully matched</span>
+
+        const element = (
+          <Media queries={queries}>
+            <Component />
+          </Media>
+        )
+
+        ReactDOM.render(element, node, () => {
+          expect(node.firstChild.innerHTML).toMatch('fully matched')
+        })
+      })
+    })
 
     describe('and a children function', () => {
-      it('should call children with expected values', () => {
-        ReactDOM.render(
+      it('should render its children function call result', () => {
+        const element = (
           <Media queries={queries}>
-            {matches => {
-              expect(matches).toMatchObject(expected)
-              return null
-            }}
-          </Media>, node)
+            {matches => matches.sm && matches.lg && <span>children as a function</span>}
+          </Media>
+        )
+
+        ReactDOM.render(element, node, () => {
+          expect(node.firstChild.innerHTML).toMatch('children as a function')
+        })
       })
     })
 
     describe('and a render prop', () => {
-      it('should call children with expected values', () => {
-        ReactDOM.render(
-          <Media queries={queries} render={matches => {
-            expect(matches).toMatchObject(expected)
-            return null
-          }} />, node)
+      it('should render `render` prop call result', () => {
+        const element = <Media queries={queries} render={matches => matches.sm && matches.lg && <span>render prop</span>} />
+
+        ReactDOM.render(element, node, () => {
+          expect(node.firstChild.innerHTML).toMatch('render prop')
+        })
       })
     })
   })
@@ -119,30 +86,45 @@ describe('A <Media> in browser environment', () => {
       lg: '(max-width: 2000px)',
     }
 
-    const expected = {
-      sm: false,
-      lg: false,
-    }
+    describe('and a child component', () => {
+      it('should not render anything', () => {
+        const Component = () => <span>I'm not rendered</span>
+
+        const element = (
+          <Media queries={queries}>
+            <Component />
+          </Media>
+        )
+
+        ReactDOM.render(element, node, () => {
+          expect(node.innerHTML).not.toMatch('I\'m not rendered')
+        })
+      })
+    })
 
     describe('and a children function', () => {
-      it('should call children with expected values', () => {
-        ReactDOM.render(
+      it('should render children function call result', () => {
+        const element = (
           <Media queries={queries}>
-            {matches => {
-              expect(matches).toMatchObject(expected)
-              return null
-            }}
-          </Media>, node)
+            {matches => !matches.sm && !matches.lg && <span>no matches at all</span>}
+          </Media>
+        )
+
+        ReactDOM.render(element, node, () => {
+          expect(node.firstChild.innerHTML).toMatch('no matches at all')
+        })
       })
     })
 
     describe('and a render prop', () => {
-      it('should call children with expected values', () => {
-        ReactDOM.render(
-          <Media queries={queries} render={matches => {
-            expect(matches).toMatchObject(expected)
-            return null
-          }} />, node)
+      it('should not call render prop at all', () => {
+        const render = jest.fn()
+
+        const element = <Media queries={queries} render={render} />
+
+        ReactDOM.render(element, node, () => {
+          expect(render).not.toBeCalled()
+        })
       })
     })
   })
@@ -162,30 +144,43 @@ describe('A <Media> in browser environment', () => {
       window.matchMedia = createMockMediaMatcher(matches)
     })
 
-    const expected = {
-      sm: true,
-      lg: false,
-    }
+    describe('and a child component', () => {
+      it('should render child and provide matches as a prop', () => {
+        const Component = (props) => props.matches.sm && !props.matches.lg && <span>partially matched</span>
+
+        const element = (
+          <Media queries={queries}>
+            <Component />
+          </Media>
+        )
+
+        ReactDOM.render(element, node, () => {
+          expect(node.firstChild.innerHTML).toMatch('partially matched')
+        })
+      })
+    })
 
     describe('and a children function', () => {
-      it('should call children with expected values', () => {
-        ReactDOM.render(
+      it('should render children function call result', () => {
+        const element = (
           <Media queries={queries}>
-            {matches => {
-              expect(matches).toMatchObject(expected)
-              return null
-            }}
-          </Media>, node)
+            {matches => matches.sm && !matches.lg && <span>yep, something definetly matched</span>}
+          </Media>
+        )
+
+        ReactDOM.render(element, node, () => {
+          expect(node.firstChild.innerHTML).toMatch('yep, something definetly matched')
+        })
       })
     })
 
     describe('and a render prop', () => {
-      it('should call children with expected values', () => {
-        ReactDOM.render(
-          <Media queries={queries} render={matches => {
-            expect(matches).toMatchObject(expected)
-            return null
-          }} />, node)
+      it('should render `render` prop call result', () => {
+        const element = <Media queries={queries} render={matches => matches.sm && !matches.lg && <span>please render me</span>} />
+
+        ReactDOM.render(element, node, () => {
+          expect(node.firstChild.innerHTML).toMatch('please render me')
+        })
       })
     })
   })

@@ -14,21 +14,16 @@ describe('A <Media> in server environment', () => {
   }
 
   describe('when no default matches prop provided', () => {
-    const expected = {
-      sm: true,
-      lg: true,
-      xl: true,
-    }
-
-    it('should call children function with all queries matching', () => {
-      ReactDOMServer.renderToStaticMarkup(
+    it('should render its children as if all queries are matching', () => {
+      const element = (
         <Media queries={queries}>
-          {matches => {
-            expect(matches).toMatchObject(expected)
-            return null
-          }}
+          {matches => matches.sm && matches.lg && matches.xl && <span>All matches, render!</span>}
         </Media>
       )
+
+      const result = ReactDOMServer.renderToStaticMarkup(element);
+
+      expect(result).toBe('<span>All matches, render!</span>')
     })
   })
 
@@ -39,15 +34,22 @@ describe('A <Media> in server environment', () => {
       xl: false,
     }
 
-    it('should call children function with expected values', () => {
-      ReactDOMServer.renderToStaticMarkup(
+    it('should render its children according to the provided defaultMatches', () => {
+      const element = (
         <Media queries={queries} defaultMatches={defaultMatches}>
-          {matches => {
-            expect(matches).toMatchObject(defaultMatches)
-            return null
-          }}
+          {matches => (
+            <div>
+              {matches.sm && <span>small</span>}
+              {matches.lg && <span>large</span>}
+              {matches.xl && <span>extra large</span>}
+            </div>
+          )}
         </Media>
       )
+
+      const result = ReactDOMServer.renderToStaticMarkup(element);
+
+      expect(result).toBe('<div><span>small</span></div>')
     })
   })
 })
