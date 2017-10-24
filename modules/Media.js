@@ -16,7 +16,10 @@ class Media extends React.Component {
     defaultMatches: PropTypes.objectOf(PropTypes.bool),
     queries: PropTypes.objectOf(queryType).isRequired,
     render: PropTypes.func,
-    children: PropTypes.func
+    children: PropTypes.oneOfType([
+      PropTypes.node,
+      PropTypes.func
+    ])
   }
 
   queries = []
@@ -64,8 +67,24 @@ class Media extends React.Component {
     const { children, render } = this.props
     const { matches } = this.state
 
-    // Preact defaults to empty children array
-    return children && !Array.isArray(children) ? children(matches) : render ? render(matches) : null
+    const isAnyMatches = Object.keys(matches).some(key => matches[key])
+
+    return render
+      ? isAnyMatches ? render(matches) : null
+      : children
+        ? typeof children === 'function'
+          ? children(matches)
+          // Preact defaults to empty children array
+          : !Array.isArray(children) || children.length
+            ? isAnyMatches
+              // We have to check whether child is a composite component or not to decide should we 
+              // provide `matches` as a prop or not
+              ? React.Children.only(children) && React.Children.only(children).type === 'string' 
+                ? React.Children.only(children)
+                : React.cloneElement(React.Children.only(children), { matches })
+              : null
+            : null
+        : null
   }
 }
 
