@@ -29,7 +29,8 @@ class Media extends React.Component {
 
   updateMatches = () => {
     const newMatches = this.queries.reduce(
-      (acc, { name, mqList }) => ({ ...acc, [name]: mqList.matches }), {}
+      (acc, { name, mqList }) => ({ ...acc, [name]: mqList.matches }),
+      {}
     )
 
     this.setState({ matches: newMatches })
@@ -42,7 +43,7 @@ class Media extends React.Component {
 
     this.queries = Object.keys(queries).map(name => {
       const query = queries[name]
-      const qs = typeof query !== 'string' ? json2mq(query) : query
+      const qs = typeof query !== "string" ? json2mq(query) : query
       const mqList = window.matchMedia(qs)
 
       mqList.addListener(this.updateMatches)
@@ -54,9 +55,7 @@ class Media extends React.Component {
   }
 
   componentWillUnmount() {
-    this.queries.forEach(({ mqList }) =>
-      mqList.removeListener(this.updateMatches)
-    )
+    this.queries.forEach(({ mqList }) => mqList.removeListener(this.updateMatches))
   }
 
   render() {
@@ -68,14 +67,14 @@ class Media extends React.Component {
     return render
       ? isAnyMatches ? render(matches) : null
       : children
-        ? typeof children === 'function'
+        ? typeof children === "function"
           ? children(matches)
-          // Preact defaults to empty children array
-          : !Array.isArray(children) || children.length
+          : // Preact defaults to empty children array
+            !Array.isArray(children) || children.length
             ? isAnyMatches
-              // We have to check whether child is a composite component or not to decide should we 
-              // provide `matches` as a prop or not
-              ? React.Children.only(children) && React.Children.only(children).type === 'string' 
+              ? // We have to check whether child is a composite component or not to decide should we
+                // provide `matches` as a prop or not
+                React.Children.only(children) && React.Children.only(children).type === "string"
                 ? React.Children.only(children)
                 : React.cloneElement(React.Children.only(children), { matches })
               : null
