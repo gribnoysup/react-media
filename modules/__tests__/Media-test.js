@@ -22,10 +22,10 @@ describe('A <Media> in browser environment', () => {
 
   let node
   beforeEach(() => {
-    node = document.createElement('div')
+    node = document.createElement("div")
   })
 
-  describe('with a query that matches', () => {
+  describe("with a query that matches", () => {
     beforeEach(() => {
       window.matchMedia = createMockMediaMatcher(true)
     })
@@ -76,7 +76,7 @@ describe('A <Media> in browser environment', () => {
     })
   })
 
-  describe('with a query that does not match', () => {
+  describe("with a query that does not match", () => {
     beforeEach(() => {
       window.matchMedia = createMockMediaMatcher(false)
     })

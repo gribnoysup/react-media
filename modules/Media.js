@@ -1,6 +1,6 @@
-import React from 'react'
-import PropTypes from 'prop-types'
-import json2mq from 'json2mq'
+import React from "react"
+import PropTypes from "prop-types"
+import json2mq from "json2mq"
 
 const queryType = PropTypes.oneOfType([
   PropTypes.string,
@@ -16,10 +16,7 @@ class Media extends React.Component {
     defaultMatches: PropTypes.objectOf(PropTypes.bool),
     queries: PropTypes.objectOf(queryType).isRequired,
     render: PropTypes.func,
-    children: PropTypes.oneOfType([
-      PropTypes.node,
-      PropTypes.func
-    ])
+    children: PropTypes.oneOfType([ PropTypes.node, PropTypes.func ])
   }
 
   queries = []
@@ -39,8 +36,7 @@ class Media extends React.Component {
   }
 
   componentWillMount() {
-    if (typeof window !== 'object')
-      return
+    if (typeof window !== "object") return
 
     const { queries } = this.props
 
